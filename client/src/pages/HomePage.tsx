@@ -1,10 +1,21 @@
 import React from 'react';
+import WorkflowDashboard from '../components/WorkflowDashboard';
+import { usePageState } from '../context/PageStateContext';
 
 interface HomePageProps {
   onTabChange: (tab: string) => void;
 }
 
 const HomePage: React.FC<HomePageProps> = ({ onTabChange }) => {
+  const { resetAllModules } = usePageState();
+
+  const handleResetAll = () => {
+    if (window.confirm('确定要重置所有模块的数据吗？这将清除所有输入和分析结果。')) {
+      resetAllModules();
+      alert('所有模块已重置成功！');
+    }
+  };
+
   const features = [
     {
       icon: '💼',
@@ -122,97 +133,40 @@ const HomePage: React.FC<HomePageProps> = ({ onTabChange }) => {
             >
               📖 了解更多
             </button>
+            <button 
+              className="btn btn-secondary" 
+              style={{ 
+                fontSize: '1rem', 
+                padding: '0.875rem 2rem',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer',
+              }}
+              onClick={handleResetAll}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+              }}
+            >
+              🔄 一键重置
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Features Section */}
-      <div style={{ marginBottom: '4rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: '700',
-            color: '#111827',
-            marginBottom: '0.75rem',
-          }}>
-            三大核心功能
-          </h2>
-          <p style={{ color: '#6b7280', fontSize: '1.0625rem' }}>
-            全方位助力你的求职之旅
-          </p>
-        </div>
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '1.5rem',
-        }}>
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              style={{
-                background: 'white',
-                borderRadius: '16px',
-                padding: '2rem',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-                border: `2px solid ${feature.borderColor}`,
-                transition: 'all 0.3s ease',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.05)';
-              }}
-            >
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '14px',
-                background: feature.bgColor,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.75rem',
-                marginBottom: '1.25rem',
-              }}>
-                {feature.icon}
-              </div>
-              
-              <h3 style={{
-                fontSize: '1.25rem',
-                fontWeight: '600',
-                color: '#111827',
-                marginBottom: '0.75rem',
-              }}>
-                {feature.title}
-              </h3>
-              
-              <p style={{
-                color: '#6b7280',
-                lineHeight: '1.6',
-                marginBottom: '1.25rem',
-              }}>
-                {feature.description}
-              </p>
-              
-              <div style={{
-                padding: '1rem',
-                background: feature.bgColor,
-                borderRadius: '10px',
-                fontSize: '0.875rem',
-                color: feature.color,
-                fontWeight: '500',
-              }}>
-                💡 帮助你理解岗位真实需求，避免盲目投递
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Workflow Dashboard */}
+      <WorkflowDashboard onTabChange={onTabChange} />
 
       {/* Target Users Section */}
       <div style={{

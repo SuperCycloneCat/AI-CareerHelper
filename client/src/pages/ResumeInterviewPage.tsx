@@ -5,14 +5,22 @@ import { usePageState } from '../context/PageStateContext';
 
 interface ResumeInterviewPageProps {
   modelConfig: ModelConfig;
+  onTabChange: (tabId: string) => void;
 }
 
-const ResumeInterviewPage: React.FC<ResumeInterviewPageProps> = ({ modelConfig }) => {
+const ResumeInterviewPage: React.FC<ResumeInterviewPageProps> = ({ modelConfig, onTabChange }) => {
   const { pageState, updateResumeInterviewState } = usePageState();
   const [resumeLoading, setResumeLoading] = useState(false);
   const [resumeError, setResumeError] = useState('');
   const [interviewLoading, setInterviewLoading] = useState(false);
   const [interviewError, setInterviewError] = useState('');
+
+  // 自动预填充数据
+  React.useEffect(() => {
+    if (pageState.actionPlanner.targetJob && !pageState.resumeInterview.jobType) {
+      updateResumeInterviewState({ jobType: pageState.actionPlanner.targetJob });
+    }
+  }, [pageState.actionPlanner.targetJob, pageState.resumeInterview.jobType, updateResumeInterviewState]);
 
   const handleResumeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +100,26 @@ const ResumeInterviewPage: React.FC<ResumeInterviewPageProps> = ({ modelConfig }
     URL.revokeObjectURL(url);
   };
 
+  const handleResumeReset = () => {
+    if (window.confirm('确定要重置简历分析部分吗？这将清除简历文本和分析结果。')) {
+      updateResumeInterviewState({ 
+        resumeText: '', 
+        resumeResult: null 
+      });
+    }
+  };
+
+  const handleInterviewReset = () => {
+    if (window.confirm('确定要重置面试模拟部分吗？这将清除面试问题、回答和反馈结果。')) {
+      updateResumeInterviewState({ 
+        interviewQuestion: '', 
+        interviewAnswer: '', 
+        jobType: '', 
+        interviewResult: null 
+      });
+    }
+  };
+
   return (
     <div className="container" style={{ padding: '2rem 1.5rem' }}>
       {/* Header */}
@@ -161,24 +189,35 @@ const ResumeInterviewPage: React.FC<ResumeInterviewPageProps> = ({ modelConfig }
                 />
               </div>
               
-              <button
-                type="submit"
-                className="btn btn-accent"
-                disabled={resumeLoading || !pageState.resumeInterview.resumeText}
-                style={{ width: '100%' }}
-              >
-                {resumeLoading ? (
-                  <>
-                    <span className="loading"></span>
-                    <span>分析中...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>🔍</span>
-                    <span>分析简历</span>
-                  </>
-                )}
-              </button>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button
+                  type="submit"
+                  className="btn btn-accent"
+                  disabled={resumeLoading || !pageState.resumeInterview.resumeText}
+                  style={{ flex: 1 }}
+                >
+                  {resumeLoading ? (
+                    <>
+                      <span className="loading"></span>
+                      <span>分析中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🔍</span>
+                      <span>分析简历</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleResumeReset}
+                  disabled={resumeLoading}
+                >
+                  <span>🔄</span>
+                  <span>重置</span>
+                </button>
+              </div>
             </form>
           </div>
 
@@ -206,9 +245,45 @@ const ResumeInterviewPage: React.FC<ResumeInterviewPageProps> = ({ modelConfig }
                     诊断
                   </h4>
                 </div>
-                <p style={{ color: '#4b5563', lineHeight: '1.7', margin: 0 }}>
-                  {pageState.resumeInterview.resumeResult.diagnosis}
-                </p>
+                <ul style={{ 
+                  margin: 0, 
+                  padding: 0, 
+                  listStyle: 'none',
+                  display: 'grid',
+                  gap: '0.75rem'
+                }}>
+                  {Array.isArray(pageState.resumeInterview.resumeResult.diagnosis) ? (
+                    pageState.resumeInterview.resumeResult.diagnosis.map((item: string, index: number) => (
+                      <li key={index} style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.5rem',
+                      }}>
+                        <span style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          background: '#3b82f6',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          flexShrink: 0,
+                          marginTop: '0.25rem',
+                        }}>
+                          {index + 1}
+                        </span>
+                        <span style={{ color: '#4b5563', lineHeight: '1.5' }}>{item}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li style={{ color: '#4b5563', lineHeight: '1.7' }}>
+                      {pageState.resumeInterview.resumeResult.diagnosis}
+                    </li>
+                  )}
+                </ul>
               </div>
               
               <div className="card" style={{ borderLeft: '4px solid #10b981' }}>
@@ -223,9 +298,32 @@ const ResumeInterviewPage: React.FC<ResumeInterviewPageProps> = ({ modelConfig }
                     改写建议
                   </h4>
                 </div>
-                <p style={{ color: '#4b5563', lineHeight: '1.7', margin: 0 }}>
-                  {pageState.resumeInterview.resumeResult.rewriteSuggestions}
-                </p>
+                {Array.isArray(pageState.resumeInterview.resumeResult.rewriteSuggestions) ? (
+                  pageState.resumeInterview.resumeResult.rewriteSuggestions.map((item: any, index: number) => (
+                    <div key={index} style={{ marginBottom: '1rem' }}>
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <h5 style={{ margin: '0 0 0.25rem', fontSize: '0.875rem', fontWeight: '600', color: '#6b7280' }}>
+                          原始内容：
+                        </h5>
+                        <p style={{ margin: 0, padding: '0.75rem', background: '#f3f4f6', borderRadius: '8px', fontSize: '0.875rem', lineHeight: '1.5' }}>
+                          {item.original || '无'}
+                        </p>
+                      </div>
+                      <div>
+                        <h5 style={{ margin: '0 0 0.25rem', fontSize: '0.875rem', fontWeight: '600', color: '#6b7280' }}>
+                          改写建议：
+                        </h5>
+                        <p style={{ margin: 0, padding: '0.75rem', background: '#ecfdf5', borderRadius: '8px', fontSize: '0.875rem', lineHeight: '1.5' }}>
+                          {item.suggested || '无'}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ color: '#4b5563', lineHeight: '1.7', margin: 0 }}>
+                    {pageState.resumeInterview.resumeResult.rewriteSuggestions}
+                  </p>
+                )}
               </div>
               
               {/* Save Button */}
@@ -301,24 +399,35 @@ const ResumeInterviewPage: React.FC<ResumeInterviewPageProps> = ({ modelConfig }
                 />
               </div>
               
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={interviewLoading || !pageState.resumeInterview.interviewQuestion || !pageState.resumeInterview.interviewAnswer}
-                style={{ width: '100%' }}
-              >
-                {interviewLoading ? (
-                  <>
-                    <span className="loading"></span>
-                    <span>生成反馈中...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>🎯</span>
-                    <span>获取改进建议</span>
-                  </>
-                )}
-              </button>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={interviewLoading || !pageState.resumeInterview.interviewQuestion || !pageState.resumeInterview.interviewAnswer}
+                  style={{ flex: 1 }}
+                >
+                  {interviewLoading ? (
+                    <>
+                      <span className="loading"></span>
+                      <span>生成反馈中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🎯</span>
+                      <span>获取改进建议</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleInterviewReset}
+                  disabled={interviewLoading}
+                >
+                  <span>🔄</span>
+                  <span>重置</span>
+                </button>
+              </div>
             </form>
           </div>
 
@@ -388,8 +497,12 @@ const ResumeInterviewPage: React.FC<ResumeInterviewPageProps> = ({ modelConfig }
                 </p>
               </div>
               
-              {/* Save Button */}
-              <div>
+              {/* Action Buttons */}
+              <div style={{ 
+                display: 'flex', 
+                gap: '1rem',
+                flexDirection: 'column'
+              }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -398,6 +511,17 @@ const ResumeInterviewPage: React.FC<ResumeInterviewPageProps> = ({ modelConfig }
                 >
                   <span>💾</span>
                   <span>保存到本地</span>
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    onTabChange('home');
+                  }}
+                  style={{ width: '100%', padding: '0.75rem' }}
+                >
+                  <span>🎉</span>
+                  <span>完成：返回工作流</span>
                 </button>
               </div>
             </div>

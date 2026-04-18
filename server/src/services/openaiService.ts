@@ -20,8 +20,7 @@ async function callSiliconFlowAPI(prompt: string, config: ModelConfig): Promise<
         }
       ],
       temperature: 0.7,
-      max_tokens: 2000,
-      response_format: { type: 'json_object' }
+      max_tokens: 2000
     }, {
       headers: {
         'Authorization': `Bearer ${config.apiKey}`,
@@ -39,8 +38,14 @@ async function callSiliconFlowAPI(prompt: string, config: ModelConfig): Promise<
   } catch (error: any) {
     console.error('硅基流动API调用失败:', error);
     // 提取更友好的错误信息
-    if (error.response && error.response.data && error.response.data.error) {
-      throw new Error(`硅基流动API错误: ${error.response.data.error.message}`);
+    if (error.response && error.response.data) {
+      if (error.response.data.error) {
+        throw new Error(`硅基流动API错误: ${error.response.data.error.message || '未知错误'}`);
+      } else if (error.response.data.Message) {
+        throw new Error(`硅基流动API错误: ${error.response.data.Message}`);
+      } else {
+        throw new Error(`硅基流动API错误: ${JSON.stringify(error.response.data)}`);
+      }
     } else if (error.message) {
       throw error;
     } else {
@@ -55,9 +60,15 @@ async function callAI(prompt: string, config: ModelConfig): Promise<any> {
   
   // 确保返回的是JSON对象
   try {
-    return typeof response === 'string' ? JSON.parse(response) : response;
+    let jsonString = typeof response === 'string' ? response : JSON.stringify(response);
+    
+    // 移除Markdown代码块标记
+    jsonString = jsonString.replace(/^```json\s*|\s*```$/g, '').trim();
+    
+    return JSON.parse(jsonString);
   } catch (error) {
     console.error('解析JSON失败:', error);
+    console.error('原始响应:', response);
     throw new Error('AI返回格式错误');
   }
 }
@@ -102,15 +113,26 @@ export async function generateActionPlan(targetJob: string, grade: string, major
 // 分析简历
 export async function analyzeResume(resumeContent: string, modelConfig: ModelConfig): Promise<any> {
   const prompt = `
-请分析以下简历片段，提供：
-1. 诊断：指出简历中的问题和改进空间
-2. 改写建议：提供具体的改写示例
+请详细分析以下简历片段，提供：
+1. 诊断：指出简历中的具体问题和改进空间，至少3点
+2. 改写建议：提供具体的改写示例，确保包含original（原始内容）和suggested（改写后内容）字段
 
 简历内容：${resumeContent}
 
-请以JSON格式输出，包含以下字段：
-- diagnosis
-- rewriteSuggestions
+请严格以JSON格式输出，包含以下字段：
+- diagnosis：数组类型，包含多个诊断项
+- rewriteSuggestions：数组类型，每个元素包含original和suggested字段
+
+示例输出格式：
+{
+  "diagnosis": ["问题1", "问题2", "问题3"],
+  "rewriteSuggestions": [
+    {
+      "original": "原始内容",
+      "suggested": "改写后的内容"
+    }
+  ]
+}
   `;
 
   return await callAI(prompt, modelConfig);

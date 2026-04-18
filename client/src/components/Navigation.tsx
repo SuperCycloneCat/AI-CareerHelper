@@ -8,6 +8,7 @@ interface NavigationProps {
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'home', label: '首页', icon: '🏠' },
+    { id: 'workflow', label: '全链路工作流', icon: '🚀' },
     { id: 'job-major', label: '岗位专业匹配', icon: '🎓' },
     { id: 'job-translator', label: '岗位翻译器', icon: '💼' },
     { id: 'action-planner', label: '行动规划师', icon: '📋' },

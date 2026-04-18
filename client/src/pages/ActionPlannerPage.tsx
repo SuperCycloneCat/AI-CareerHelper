@@ -5,12 +5,25 @@ import { usePageState } from '../context/PageStateContext';
 
 interface ActionPlannerPageProps {
   modelConfig: ModelConfig;
+  onTabChange: (tabId: string) => void;
 }
 
-const ActionPlannerPage: React.FC<ActionPlannerPageProps> = ({ modelConfig }) => {
-  const { pageState, updateActionPlannerState } = usePageState();
+const ActionPlannerPage: React.FC<ActionPlannerPageProps> = ({ modelConfig, onTabChange }) => {
+  const { pageState, updateActionPlannerState, syncDataToNextModule } = usePageState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // 自动预填充数据
+  React.useEffect(() => {
+    if (pageState.jobTranslator.result && !pageState.actionPlanner.targetJob) {
+      const jobTitle = pageState.jobTranslator.jobDescription.match(/职位[：:]\s*(.+)/)?.[1] || 
+                      pageState.jobTranslator.jobDescription.match(/岗位[：:]\s*(.+)/)?.[1] || 
+                      pageState.jobTranslator.jobDescription.substring(0, 50);
+      if (jobTitle) {
+        updateActionPlannerState({ targetJob: jobTitle });
+      }
+    }
+  }, [pageState.jobTranslator.result, pageState.actionPlanner.targetJob, updateActionPlannerState]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +63,17 @@ const ActionPlannerPage: React.FC<ActionPlannerPageProps> = ({ modelConfig }) =>
     link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleReset = () => {
+    if (window.confirm('确定要重置所有内容吗？这将清除所有输入和生成的计划。')) {
+      updateActionPlannerState({ 
+        targetJob: '', 
+        grade: '', 
+        major: '', 
+        result: null 
+      });
+    }
   };
 
   const monthColors = [
@@ -143,24 +167,36 @@ const ActionPlannerPage: React.FC<ActionPlannerPageProps> = ({ modelConfig }) =>
             </div>
           </div>
           
-          <button
-            type="submit"
-            className="btn btn-success"
-            disabled={loading || !pageState.actionPlanner.targetJob || !pageState.actionPlanner.grade || !pageState.actionPlanner.major}
-            style={{ width: '100%', padding: '1rem' }}
-          >
-            {loading ? (
-              <>
-                <span className="loading"></span>
-                <span>生成计划中...</span>
-              </>
-            ) : (
-              <>
-                <span>🎯</span>
-                <span>生成行动规划</span>
-              </>
-            )}
-          </button>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button
+              type="submit"
+              className="btn btn-success"
+              disabled={loading || !pageState.actionPlanner.targetJob || !pageState.actionPlanner.grade || !pageState.actionPlanner.major}
+              style={{ flex: 1, padding: '1rem' }}
+            >
+              {loading ? (
+                <>
+                  <span className="loading"></span>
+                  <span>生成计划中...</span>
+                </>
+              ) : (
+                <>
+                  <span>🎯</span>
+                  <span>生成行动规划</span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleReset}
+              disabled={loading}
+              style={{ padding: '1rem' }}
+            >
+              <span>🔄</span>
+              <span>重置</span>
+            </button>
+          </div>
         </form>
       </div>
 
@@ -286,8 +322,13 @@ const ActionPlannerPage: React.FC<ActionPlannerPageProps> = ({ modelConfig }) =>
             ))}
           </div>
           
-          {/* Save Button */}
-          <div style={{ marginTop: '2rem' }}>
+          {/* Action Buttons */}
+          <div style={{ 
+            marginTop: '2rem', 
+            display: 'flex', 
+            gap: '1rem',
+            flexDirection: 'column'
+          }}>
             <button
               type="button"
               className="btn btn-secondary"
@@ -296,6 +337,18 @@ const ActionPlannerPage: React.FC<ActionPlannerPageProps> = ({ modelConfig }) =>
             >
               <span>💾</span>
               <span>保存到本地</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                syncDataToNextModule('action-planner');
+                onTabChange('resume-interview');
+              }}
+              style={{ width: '100%', padding: '0.875rem' }}
+            >
+              <span>➡️</span>
+              <span>下一步：简历面试准备</span>
             </button>
           </div>
         </div>

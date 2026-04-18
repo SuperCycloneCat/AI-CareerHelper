@@ -5,10 +5,11 @@ import { usePageState } from '../context/PageStateContext';
 
 interface JobTranslatorPageProps {
   modelConfig: ModelConfig;
+  onTabChange: (tabId: string) => void;
 }
 
-const JobTranslatorPage: React.FC<JobTranslatorPageProps> = ({ modelConfig }) => {
-  const { pageState, updateJobTranslatorState } = usePageState();
+const JobTranslatorPage: React.FC<JobTranslatorPageProps> = ({ modelConfig, onTabChange }) => {
+  const { pageState, updateJobTranslatorState, syncDataToNextModule } = usePageState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -49,6 +50,16 @@ const JobTranslatorPage: React.FC<JobTranslatorPageProps> = ({ modelConfig }) =>
     link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleReset = () => {
+    if (window.confirm('确定要重置所有内容吗？这将清除所有输入和分析结果。')) {
+      updateJobTranslatorState({ 
+        jobDescription: '', 
+        jobLink: '', 
+        result: null 
+      });
+    }
   };
 
   return (
@@ -135,24 +146,36 @@ const JobTranslatorPage: React.FC<JobTranslatorPageProps> = ({ modelConfig }) =>
             />
           </div>
           
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading || (!pageState.jobTranslator.jobDescription && !pageState.jobTranslator.jobLink)}
-            style={{ width: '100%', padding: '1rem' }}
-          >
-            {loading ? (
-              <>
-                <span className="loading"></span>
-                <span>分析中...</span>
-              </>
-            ) : (
-              <>
-                <span>🔍</span>
-                <span>开始分析岗位</span>
-              </>
-            )}
-          </button>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading || (!pageState.jobTranslator.jobDescription && !pageState.jobTranslator.jobLink)}
+              style={{ flex: 1, padding: '1rem' }}
+            >
+              {loading ? (
+                <>
+                  <span className="loading"></span>
+                  <span>分析中...</span>
+                </>
+              ) : (
+                <>
+                  <span>🔍</span>
+                  <span>开始分析岗位</span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleReset}
+              disabled={loading}
+              style={{ padding: '1rem' }}
+            >
+              <span>🔄</span>
+              <span>重置</span>
+            </button>
+          </div>
         </form>
       </div>
 
@@ -286,8 +309,13 @@ const JobTranslatorPage: React.FC<JobTranslatorPageProps> = ({ modelConfig }) =>
             </p>
           </div>
           
-          {/* Save Button */}
-          <div style={{ marginTop: '1.5rem' }}>
+          {/* Action Buttons */}
+          <div style={{ 
+            marginTop: '2rem', 
+            display: 'flex', 
+            gap: '1rem',
+            flexDirection: 'column'
+          }}>
             <button
               type="button"
               className="btn btn-secondary"
@@ -296,6 +324,18 @@ const JobTranslatorPage: React.FC<JobTranslatorPageProps> = ({ modelConfig }) =>
             >
               <span>💾</span>
               <span>保存到本地</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                syncDataToNextModule('job-translator');
+                onTabChange('action-planner');
+              }}
+              style={{ width: '100%', padding: '0.875rem' }}
+            >
+              <span>➡️</span>
+              <span>下一步：制定行动规划</span>
             </button>
           </div>
         </div>

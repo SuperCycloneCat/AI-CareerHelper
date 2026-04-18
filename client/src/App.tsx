@@ -8,6 +8,7 @@ import JobTranslatorPage from './pages/JobTranslatorPage';
 import ActionPlannerPage from './pages/ActionPlannerPage';
 import ResumeInterviewPage from './pages/ResumeInterviewPage';
 import ApiConfigPage from './pages/ApiConfigPage';
+import WorkflowPage from './pages/WorkflowPage';
 import { PageStateProvider } from './context/PageStateContext';
 
 interface ModelConfig {
@@ -52,11 +53,13 @@ function App() {
       case 'job-major':
         return <JobMajorPage />;
       case 'job-translator':
-        return <JobTranslatorPage modelConfig={modelConfig} />;
+        return <JobTranslatorPage modelConfig={modelConfig} onTabChange={setActiveTab} />;
       case 'action-planner':
-        return <ActionPlannerPage modelConfig={modelConfig} />;
+        return <ActionPlannerPage modelConfig={modelConfig} onTabChange={setActiveTab} />;
       case 'resume-interview':
-        return <ResumeInterviewPage modelConfig={modelConfig} />;
+        return <ResumeInterviewPage modelConfig={modelConfig} onTabChange={setActiveTab} />;
+      case 'workflow':
+        return <WorkflowPage modelConfig={modelConfig} onTabChange={setActiveTab} />;
       case 'api-config':
         return <ApiConfigPage modelConfig={modelConfig} setModelConfig={handleConfigChange} />;
       default:
