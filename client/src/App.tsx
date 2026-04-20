@@ -8,7 +8,8 @@ import JobTranslatorPage from './pages/JobTranslatorPage';
 import ActionPlannerPage from './pages/ActionPlannerPage';
 import ResumeInterviewPage from './pages/ResumeInterviewPage';
 import ApiConfigPage from './pages/ApiConfigPage';
-import WorkflowPage from './pages/WorkflowPage';
+import MeteorEffect from './components/MeteorEffect';
+import DayModeEffect from './components/DayModeEffect';
 import { PageStateProvider } from './context/PageStateContext';
 
 interface ModelConfig {
@@ -24,6 +25,7 @@ function App() {
     apiKey: '',
     baseUrl: 'https://api.siliconflow.cn/v1',
   });
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // 从localStorage加载配置
   useEffect(() => {
@@ -36,6 +38,14 @@ function App() {
         console.error('解析配置失败:', error);
       }
     }
+
+    // 从localStorage加载主题设置
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      const isDark = savedTheme === 'dark';
+      setIsDarkMode(isDark);
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
   }, []);
 
   // 保存配置到localStorage
@@ -44,33 +54,51 @@ function App() {
     localStorage.setItem('siliconflowConfig', JSON.stringify(config));
   };
 
+  // 切换主题
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme ? 'dark' : 'light');
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomePage onTabChange={setActiveTab} />;
+        return <HomePage onTabChange={setActiveTab} isDarkMode={isDarkMode} />;
       case 'about':
-        return <AboutPage onTabChange={setActiveTab} />;
+        return <AboutPage onTabChange={setActiveTab} isDarkMode={isDarkMode} />;
       case 'job-major':
-        return <JobMajorPage />;
+        return <JobMajorPage isDarkMode={isDarkMode} />;
       case 'job-translator':
-        return <JobTranslatorPage modelConfig={modelConfig} onTabChange={setActiveTab} />;
+        return <JobTranslatorPage modelConfig={modelConfig} isDarkMode={isDarkMode} />;
       case 'action-planner':
-        return <ActionPlannerPage modelConfig={modelConfig} onTabChange={setActiveTab} />;
+        return <ActionPlannerPage modelConfig={modelConfig} isDarkMode={isDarkMode} />;
       case 'resume-interview':
-        return <ResumeInterviewPage modelConfig={modelConfig} onTabChange={setActiveTab} />;
-      case 'workflow':
-        return <WorkflowPage modelConfig={modelConfig} onTabChange={setActiveTab} />;
+        return <ResumeInterviewPage modelConfig={modelConfig} isDarkMode={isDarkMode} />;
       case 'api-config':
-        return <ApiConfigPage modelConfig={modelConfig} setModelConfig={handleConfigChange} />;
+        return <ApiConfigPage modelConfig={modelConfig} setModelConfig={handleConfigChange} isDarkMode={isDarkMode} />;
       default:
-        return <HomePage onTabChange={setActiveTab} />;
+        return <HomePage onTabChange={setActiveTab} isDarkMode={isDarkMode} />;
     }
   };
 
   return (
     <PageStateProvider>
-      <div className="App min-h-screen bg-gray-100">
-        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="App min-h-screen" style={{
+        background: isDarkMode 
+          ? 'linear-gradient(135deg, #0a0f1a 0%, #0f172a 50%, #0a0f1a 100%)'
+          : 'linear-gradient(180deg, #87CEEB 0%, #B0E0E6 30%, #E0F4FF 70%, #F0F9FF 100%)',
+        transition: 'background 0.5s ease',
+      }}>
+        <MeteorEffect isDarkMode={isDarkMode} />
+        <DayModeEffect isDarkMode={isDarkMode} />
+        <Navigation 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+          isDarkMode={isDarkMode}
+          onToggleTheme={toggleTheme}
+        />
         <main className="py-8">
           {renderContent()}
         </main>

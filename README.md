@@ -25,6 +25,20 @@ AI职场行动教练是一个Web应用，旨在为大三、大四及应届毕业
 - 粘贴简历片段 → AI诊断并改写
 - 模拟面试问题 → 用户回答 → AI给出改进建议
 
+## 视觉效果
+
+### 白天模式
+- 淡蓝色天空背景
+- 浮动云朵动画
+- 太阳发光效果
+- 温暖阳光氛围
+
+### 夜间模式
+- 深色夜空背景
+- 流星划过效果
+- 月亮与环形山
+- 闪烁星星背景
+
 ## 技术栈
 
 ### 前端
@@ -32,6 +46,7 @@ AI职场行动教练是一个Web应用，旨在为大三、大四及应届毕业
 - Vite
 - TailwindCSS
 - Axios
+- CSS 动画效果
 
 ### 后端
 - Node.js + Express
@@ -46,8 +61,20 @@ CareerHelper/
 ├── client/                 # 前端项目
 │   ├── src/
 │   │   ├── components/     # 组件
+│   │   │   ├── ApiConfig.tsx         # API配置组件
+│   │   │   ├── DayModeEffect.tsx      # 白天模式效果
+│   │   │   ├── MeteorEffect.tsx       # 夜间模式效果
+│   │   │   └── Navigation.tsx        # 导航组件
 │   │   ├── context/        # 上下文
+│   │   │   └── PageStateContext.tsx  # 页面状态管理
 │   │   ├── pages/          # 页面
+│   │   │   ├── AboutPage.tsx          # 关于页面
+│   │   │   ├── ActionPlannerPage.tsx  # 行动规划师
+│   │   │   ├── ApiConfigPage.tsx      # API配置页面
+│   │   │   ├── HomePage.tsx           # 首页
+│   │   │   ├── JobMajorPage.tsx       # 岗位专业匹配
+│   │   │   ├── JobTranslatorPage.tsx  # 岗位翻译器
+│   │   │   └── ResumeInterviewPage.tsx # 简历面试教练
 │   │   ├── App.css         # 应用样式
 │   │   ├── App.tsx         # 应用入口
 │   │   ├── index.css        # 全局样式
@@ -62,7 +89,11 @@ CareerHelper/
 ├── server/                 # 后端项目
 │   ├── src/
 │   │   ├── routes/         # 路由
+│   │   │   ├── actionPlanner.ts       # 行动规划路由
+│   │   │   ├── jobTranslator.ts       # 岗位翻译路由
+│   │   │   └── resumeInterview.ts     # 简历面试路由
 │   │   ├── services/       # 服务
+│   │   │   └── openaiService.ts       # OpenAI服务
 │   │   └── app.ts          # 应用入口
 │   ├── .env                # 环境变量
 │   ├── .env.example        # 环境变量示例
@@ -127,6 +158,11 @@ CareerHelper/
 
 ## 使用指南
 
+### 主题切换
+- 点击导航栏右侧的主题切换按钮
+- 切换白天模式：淡蓝色天空 + 云朵 + 太阳
+- 切换夜间模式：深色夜空 + 流星 + 月亮 + 星星
+
 ### 岗位专业匹配
 1. 进入「岗位专业匹配」页面
 2. 浏览不同岗位及其相关专业
@@ -168,6 +204,8 @@ CareerHelper/
 - 增加更多行业和岗位的针对性分析
 - 优化AI模型选择和Prompt设计
 - 添加数据可视化功能
+- 增强主题切换效果
+- 添加更多交互动画
 
 ## 技术支持
 

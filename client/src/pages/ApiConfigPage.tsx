@@ -5,13 +5,15 @@ import { ModelConfig } from '../App';
 interface ApiConfigPageProps {
   modelConfig: ModelConfig;
   setModelConfig: (config: ModelConfig) => void;
+  isDarkMode?: boolean;
 }
 
-const ApiConfigPage: React.FC<ApiConfigPageProps> = ({ modelConfig, setModelConfig }) => {
+const ApiConfigPage: React.FC<ApiConfigPageProps> = ({ modelConfig, setModelConfig, isDarkMode = false }) => {
   return (
     <ApiConfig 
       currentConfig={modelConfig} 
-      onConfigChange={setModelConfig} 
+      onConfigChange={setModelConfig}
+      isDarkMode={isDarkMode}
     />
   );
 };

@@ -9,7 +9,11 @@ interface JobMajor {
   requiredSkills: string[];
 }
 
-const JobMajorPage: React.FC = () => {
+interface JobMajorPageProps {
+  isDarkMode?: boolean;
+}
+
+const JobMajorPage: React.FC<JobMajorPageProps> = ({ isDarkMode = false }) => {
   const [selectedJob, setSelectedJob] = useState<JobMajor | null>(null);
   
   const jobs: JobMajor[] = [
@@ -68,10 +72,23 @@ const JobMajorPage: React.FC = () => {
     }
   };
 
+  const getDifficultyBgColor = (difficulty: string) => {
+    switch (difficulty) {
+      case '低':
+        return isDarkMode ? 'rgba(16, 185, 129, 0.2)' : '#d1fae5';
+      case '中':
+        return isDarkMode ? 'rgba(245, 158, 11, 0.2)' : '#fef3c7';
+      case '高':
+        return isDarkMode ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2';
+      default:
+        return isDarkMode ? 'rgba(107, 114, 128, 0.2)' : '#f3f4f6';
+    }
+  };
+
   return (
     <div className="container" style={{ padding: '2rem 1.5rem' }}>
       {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
+      <div className="fade-in" style={{ marginBottom: '2rem' }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -87,14 +104,18 @@ const JobMajorPage: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '1.5rem',
+            boxShadow: isDarkMode 
+              ? '0 8px 24px rgba(139, 92, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)' 
+              : '0 8px 16px rgba(139, 92, 246, 0.3)',
+            transition: 'all 0.3s ease',
           }}>
             🎓
           </div>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '700' }}>
+            <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '700', color: isDarkMode ? '#f1f5f9' : '#111827', transition: 'color 0.3s ease' }}>
               岗位专业匹配
             </h2>
-            <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9375rem' }}>
+            <p style={{ margin: 0, color: isDarkMode ? '#94a3b8' : '#6b7280', fontSize: '0.9375rem', transition: 'color 0.3s ease' }}>
               了解不同岗位对应的专业要求，评估跨专业求职难度
             </p>
           </div>
@@ -111,11 +132,15 @@ const JobMajorPage: React.FC = () => {
         {jobs.map((job) => (
           <div
             key={job.id}
-            className="card"
+            className="card hover-lift fade-in"
             style={{
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              border: '1px solid #e5e7eb'
+              border: isDarkMode ? '1px solid rgba(139, 92, 246, 0.2)' : '1px solid #e5e7eb',
+              background: isDarkMode ? 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)' : undefined,
+              boxShadow: isDarkMode 
+                ? '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)' 
+                : undefined,
             }}
             onClick={() => setSelectedJob(job)}
           >
@@ -125,7 +150,7 @@ const JobMajorPage: React.FC = () => {
               alignItems: 'flex-start',
               marginBottom: '1rem'
             }}>
-              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', color: isDarkMode ? '#f1f5f9' : '#111827', transition: 'color 0.3s ease' }}>
                 {job.jobTitle}
               </h3>
               <div style={{
@@ -133,15 +158,17 @@ const JobMajorPage: React.FC = () => {
                 borderRadius: '9999px',
                 fontSize: '0.75rem',
                 fontWeight: '500',
-                background: getDifficultyColor(job.crossMajorDifficulty) + '20',
-                color: getDifficultyColor(job.crossMajorDifficulty)
+                background: getDifficultyBgColor(job.crossMajorDifficulty),
+                color: getDifficultyColor(job.crossMajorDifficulty),
+                border: isDarkMode ? `1px solid ${getDifficultyColor(job.crossMajorDifficulty)}40` : 'none',
+                transition: 'all 0.3s ease',
               }}>
                 跨专业难度：{job.crossMajorDifficulty}
               </div>
             </div>
             
             <div style={{ marginBottom: '1rem' }}>
-              <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', fontWeight: '600', color: '#6b7280' }}>
+              <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', fontWeight: '600', color: isDarkMode ? '#94a3b8' : '#6b7280', transition: 'color 0.3s ease' }}>
                 相关专业
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -150,10 +177,13 @@ const JobMajorPage: React.FC = () => {
                     key={index}
                     style={{
                       padding: '0.375rem 0.75rem',
-                      background: '#f3f4f6',
+                      background: isDarkMode ? 'rgba(139, 92, 246, 0.15)' : '#f3f4f6',
                       borderRadius: '9999px',
                       fontSize: '0.75rem',
-                      fontWeight: '500'
+                      fontWeight: '500',
+                      color: isDarkMode ? '#c4b5fd' : '#374151',
+                      border: isDarkMode ? '1px solid rgba(139, 92, 246, 0.3)' : 'none',
+                      transition: 'all 0.3s ease',
                     }}
                   >
                     {major}
@@ -164,7 +194,7 @@ const JobMajorPage: React.FC = () => {
             
             <button
               type="button"
-              className="btn btn-secondary"
+              className="btn btn-secondary hover-lift"
               style={{ width: '100%' }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -185,20 +215,32 @@ const JobMajorPage: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
+          background: isDarkMode 
+            ? 'rgba(0, 0, 0, 0.8)' 
+            : 'rgba(0, 0, 0, 0.5)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          transition: 'background 0.3s ease',
         }}>
           <div style={{
-            background: 'white',
-            borderRadius: '12px',
+            background: isDarkMode 
+              ? 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)' 
+              : 'white',
+            borderRadius: '16px',
             padding: '2rem',
             maxWidth: '600px',
             width: '90%',
             maxHeight: '80vh',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            border: isDarkMode ? '1px solid rgba(139, 92, 246, 0.3)' : 'none',
+            boxShadow: isDarkMode 
+              ? '0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)' 
+              : '0 25px 50px rgba(0, 0, 0, 0.25)',
+            transition: 'all 0.3s ease',
           }}>
             <div style={{
               display: 'flex',
@@ -206,17 +248,24 @@ const JobMajorPage: React.FC = () => {
               alignItems: 'flex-start',
               marginBottom: '1.5rem'
             }}>
-              <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
+              <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600', color: isDarkMode ? '#f1f5f9' : '#111827', transition: 'color 0.3s ease' }}>
                 {selectedJob.jobTitle}
               </h3>
               <button
                 type="button"
                 style={{
-                  background: 'none',
-                  border: 'none',
+                  background: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'none',
+                  border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
                   fontSize: '1.5rem',
                   cursor: 'pointer',
-                  color: '#6b7280'
+                  color: isDarkMode ? '#94a3b8' : '#6b7280',
+                  borderRadius: '8px',
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease',
                 }}
                 onClick={() => setSelectedJob(null)}
               >
@@ -231,19 +280,21 @@ const JobMajorPage: React.FC = () => {
                 borderRadius: '9999px',
                 fontSize: '0.75rem',
                 fontWeight: '500',
-                background: getDifficultyColor(selectedJob.crossMajorDifficulty) + '20',
+                background: getDifficultyBgColor(selectedJob.crossMajorDifficulty),
                 color: getDifficultyColor(selectedJob.crossMajorDifficulty),
-                marginBottom: '1rem'
+                border: isDarkMode ? `1px solid ${getDifficultyColor(selectedJob.crossMajorDifficulty)}40` : 'none',
+                marginBottom: '1rem',
+                transition: 'all 0.3s ease',
               }}>
                 跨专业难度：{selectedJob.crossMajorDifficulty}
               </div>
-              <p style={{ margin: 0, lineHeight: '1.6', color: '#4b5563' }}>
+              <p style={{ margin: 0, lineHeight: '1.6', color: isDarkMode ? '#cbd5e1' : '#4b5563', transition: 'color 0.3s ease' }}>
                 {selectedJob.description}
               </p>
             </div>
             
             <div style={{ marginBottom: '1.5rem' }}>
-              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1.125rem', fontWeight: '600' }}>
+              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1.125rem', fontWeight: '600', color: isDarkMode ? '#f1f5f9' : '#111827', transition: 'color 0.3s ease' }}>
                 核心技能要求
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -252,10 +303,13 @@ const JobMajorPage: React.FC = () => {
                     key={index}
                     style={{
                       padding: '0.5rem 1rem',
-                      background: '#f3f4f6',
+                      background: isDarkMode ? 'rgba(59, 130, 246, 0.15)' : '#eff6ff',
                       borderRadius: '9999px',
                       fontSize: '0.875rem',
-                      fontWeight: '500'
+                      fontWeight: '500',
+                      color: isDarkMode ? '#93c5fd' : '#2563eb',
+                      border: isDarkMode ? '1px solid rgba(59, 130, 246, 0.3)' : 'none',
+                      transition: 'all 0.3s ease',
                     }}
                   >
                     {skill}
@@ -265,7 +319,7 @@ const JobMajorPage: React.FC = () => {
             </div>
             
             <div style={{ marginBottom: '1.5rem' }}>
-              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1.125rem', fontWeight: '600' }}>
+              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1.125rem', fontWeight: '600', color: isDarkMode ? '#f1f5f9' : '#111827', transition: 'color 0.3s ease' }}>
                 相关专业
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -274,10 +328,13 @@ const JobMajorPage: React.FC = () => {
                     key={index}
                     style={{
                       padding: '0.5rem 1rem',
-                      background: '#f3f4f6',
+                      background: isDarkMode ? 'rgba(139, 92, 246, 0.15)' : '#f3f4f6',
                       borderRadius: '9999px',
                       fontSize: '0.875rem',
-                      fontWeight: '500'
+                      fontWeight: '500',
+                      color: isDarkMode ? '#c4b5fd' : '#374151',
+                      border: isDarkMode ? '1px solid rgba(139, 92, 246, 0.3)' : 'none',
+                      transition: 'all 0.3s ease',
                     }}
                   >
                     {major}
@@ -286,11 +343,20 @@ const JobMajorPage: React.FC = () => {
               </div>
             </div>
             
-            <div>
-              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1.125rem', fontWeight: '600' }}>
+            <div style={{ 
+              marginBottom: '1.5rem',
+              padding: '1.25rem',
+              background: isDarkMode 
+                ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)' 
+                : '#f8fafc',
+              borderRadius: '12px',
+              border: isDarkMode ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid #e2e8f0',
+              transition: 'all 0.3s ease',
+            }}>
+              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1.125rem', fontWeight: '600', color: isDarkMode ? '#f1f5f9' : '#111827', transition: 'color 0.3s ease' }}>
                 跨专业求职建议
               </h4>
-              <p style={{ margin: 0, lineHeight: '1.6', color: '#4b5563' }}>
+              <p style={{ margin: 0, lineHeight: '1.6', color: isDarkMode ? '#cbd5e1' : '#4b5563', transition: 'color 0.3s ease' }}>
                 {selectedJob.crossMajorDifficulty === '低' && 
                   '该岗位跨专业求职难度较低，建议通过实习、项目经验等方式积累相关经验，提高竞争力。'}
                 {selectedJob.crossMajorDifficulty === '中' && 
@@ -303,8 +369,14 @@ const JobMajorPage: React.FC = () => {
             <div style={{ marginTop: '2rem', textAlign: 'right' }}>
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="btn btn-secondary hover-lift"
                 onClick={() => setSelectedJob(null)}
+                style={{ 
+                  borderRadius: '12px',
+                  background: isDarkMode ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' : undefined,
+                  color: isDarkMode ? '#ffffff' : undefined,
+                  border: 'none',
+                }}
               >
                 关闭
               </button>
